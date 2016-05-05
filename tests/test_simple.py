@@ -1,10 +1,12 @@
 from fjorton import fjorton
 
+a = 2
+b = 4
+
 
 def add(stack):
     while len(stack) > 1:
         stack[0] += stack.pop()
-    return stack[0]
 
 
 class TestSupportedTypes(object):
@@ -28,3 +30,41 @@ class TestSupportedTypes(object):
             add
 
         assert f() == [8]
+
+    def test_deref(self):
+        a = 2
+        b = 3
+
+        @fjorton
+        def f():
+            a
+            b
+            add
+
+        assert f() == [5]
+
+    def test_globals(self):
+
+        @fjorton
+        def f():
+            a
+            b
+            add
+
+        assert f() == [6]
+
+    def test_object_attrs(self):
+
+        class TA(object):
+            attr = 56
+
+        class TB(object):
+            attr = 67
+
+        @fjorton
+        def f():
+            TA().attr
+            TB().attr
+            add
+
+        assert f() == [123]
