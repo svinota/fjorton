@@ -28,11 +28,19 @@ def fjorton(f):
                     (byteplay.CALL_FUNCTION, 1),
                     (byteplay.POP_TOP, None)])
 
+    def to_call(ret):
+            ret.pop()
+            ret.extend([(byteplay.LOAD_GLOBAL, 'locals'),
+                        (byteplay.CALL_FUNCTION, 0),
+                        (byteplay.LOAD_CONST, '___stack___'),
+                        (byteplay.BINARY_SUBSCR, None),
+                        (byteplay.CALL_FUNCTION, 1),
+                        (byteplay.POP_TOP, None)])
+
     global ___stack_code
     c = byteplay.Code.from_code(f.func_code)
     simple = (byteplay.LOAD_FAST,
               byteplay.LOAD_CONST,
-              byteplay.LOAD_DEREF,
               byteplay.LOAD_ATTR,
               byteplay.BUILD_LIST)
     ret = []
@@ -54,13 +62,16 @@ def fjorton(f):
                 ret[-2][0] == byteplay.LOAD_GLOBAL:
             # is it a variable or a function?
             if hasattr(f.func_globals[ret[-2][1]], '__call__'):
-                ret.pop()
-                ret.extend([(byteplay.LOAD_GLOBAL, 'locals'),
-                            (byteplay.CALL_FUNCTION, 0),
-                            (byteplay.LOAD_CONST, '___stack___'),
-                            (byteplay.BINARY_SUBSCR, None),
-                            (byteplay.CALL_FUNCTION, 1),
-                            (byteplay.POP_TOP, None)])
+                to_call(ret)
+            else:
+                to_stack(ret)
+        elif code == byteplay.POP_TOP and \
+                ret[-2][0] == byteplay.LOAD_DEREF:
+            for cell in f.func_closure:
+                if hasattr(cell.cell_contents, '__call__') and \
+                        cell.cell_contents.func_name == ret[-2][1]:
+                    to_call(ret)
+                    break
             else:
                 to_stack(ret)
         elif code == byteplay.RETURN_VALUE and \

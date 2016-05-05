@@ -34,14 +34,17 @@ class TestSupportedTypes(object):
     def test_deref(self):
         a = 2
         b = 3
+        def c(s):
+            s[-1] += 7
 
         @fjorton
         def f():
             a
             b
+            c
             add
 
-        assert f() == [5]
+        assert f() == [12]
 
     def test_globals(self):
 
