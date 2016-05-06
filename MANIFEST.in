@@ -1,0 +1,3 @@
+include setup.ini
+include README*
+include LICENSE*

@@ -1,2 +1,6 @@
 *.pyc
 *.swp
+setup.ini
+MANIFEST
+dist/
+fjorton.egg-info/
