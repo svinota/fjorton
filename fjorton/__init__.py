@@ -3,7 +3,7 @@ import byteplay
 
 def ___cstack():
     try:
-        ___stack___ = argv
+        ___stack___ = stack
     except NameError:
         ___stack___ = []
     return ___stack___
@@ -42,10 +42,9 @@ def fjorton(f):
     simple = (byteplay.LOAD_FAST,
               byteplay.LOAD_CONST,
               byteplay.LOAD_ATTR,
+              byteplay.STORE_MAP,
               byteplay.BUILD_LIST)
     ret = []
-    more = -1
-    more_trigger = None
     ret.extend(___stack_code)
     for code, value in c.code:
         if code == byteplay.LOAD_CONST:
@@ -53,10 +52,8 @@ def fjorton(f):
                 value = value[0]
         ret.append((code, value))
 
-        if code in simple:
-            more = 0
-            continue
-        elif more == 0 and code == byteplay.POP_TOP:
+        if code == byteplay.POP_TOP and \
+                ret[-2][0] in simple:
             to_stack(ret)
         elif code == byteplay.POP_TOP and \
                 ret[-2][0] == byteplay.LOAD_GLOBAL:
@@ -83,12 +80,6 @@ def fjorton(f):
                         (byteplay.LOAD_CONST, '___stack___'),
                         (byteplay.BINARY_SUBSCR, None),
                         (byteplay.RETURN_VALUE, None)])
-
-        if more >= 0:
-            if more_trigger and code == more_trigger:
-                more -= 1
-            elif more_trigger is None:
-                more -= 1
 
     c.code = ret
     f.func_code = c.to_code()
