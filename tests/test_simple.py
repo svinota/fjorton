@@ -93,12 +93,16 @@ class TestSupportedTypes(object):
             [[RTM_NEWLINK, {'attrs': [['IFLA_IFNAME', 'eth0'],
                                       ['IFLA_ADDRESS', 'c2:b3:74:94:c2:8d']]}],
              [RTM_NEWLINK, {'attrs': [['IFLA_IFNAME', 'eth1'],
-                                      ['IFLA_ADDRESS', 'c2:b3:74:94:c2:8d']]}]]
+                                      ['IFLA_ADDRESS', 'c2:b3:74:94:c2:8e']]}],
+             [RTM_NEWLINK, {'attrs': [['IFLA_IFNAME', 'eth2'],
+                                      ['IFLA_ADDRESS', 'c2:b3:74:94:c2:8f']]}],
+             [RTM_DELLINK, {'attrs': [['IFLA_IFNAME', 'eth1'],
+                                      ['IFLA_ADDRESS', 'c2:b3:74:94:c2:8e']]}]]
             {RTM_NEWLINK: lambda x, y: x.add(y),
              RTM_DELLINK: lambda x, y: x.remove(y)}
             get_interfaces
 
-        assert f() == [set(('eth0', 'eth1'))]
+        assert f() == [set(('eth0', 'eth2'))]
 
     def test_object_attrs(self):
 
