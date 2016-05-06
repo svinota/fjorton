@@ -74,7 +74,6 @@ class TestSupportedTypes(object):
 
         @fjorton
         def get_interfaces(stack):
-            print(stack)
             ops = stack.pop()
             events = stack.pop()
             ret = set()
