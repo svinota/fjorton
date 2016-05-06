@@ -57,7 +57,7 @@ def f():
     56,   # 56 is pushed to the stack
     67,   # 67 is pushed to the stack
     add   # `add()` is being called as `add(locals()['___stack___'])`
-    #     # here the function return the stack
+    #     # here the function returns the stack
 
 f() == [123]
 ```
