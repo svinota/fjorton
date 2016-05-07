@@ -43,6 +43,7 @@ def fjorton(f):
               byteplay.LOAD_CONST,
               byteplay.LOAD_ATTR,
               byteplay.STORE_MAP,
+              byteplay.CALL_FUNCTION,
               byteplay.BUILD_LIST)
     ret = []
     ret.extend(___stack_code)
