@@ -15,6 +15,14 @@ ___stack_code = list(filter(lambda x: x[0] != byteplay.SetLineno,
                              .code)))[:-2]
 
 
+def show_stack(stack):
+    print(stack)
+
+
+def apply(stack):
+    stack.append(stack.pop()(stack.pop()))
+
+
 def fjorton(f):
 
     def to_stack(ret):
