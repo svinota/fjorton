@@ -31,9 +31,10 @@ On the injected function call [1] check function arguments.
 * `args[0] == 'stack'` → pass the stack reference.
 * `not args or args[0] != 'stack'` → map the stack cells
 
-*+* : transparent
-*+* : all the logic is incapsulated in one code piece
-*-* : seriosly slows down the code with excessive checks
+…
+* **+** : transparent
+* **+** : all the logic is incapsulated in one code piece
+* **-** : seriosly slows down the code with excessive checks
 
 Example:
 ```python
@@ -63,8 +64,8 @@ f(2, 5)
 
 Check the function signature in the `@fjorton` decorator.
 
-*+* : one decorator name for all functions
-*-* : unclear logic: how to handle cases with calls from different contexts
+* **+** : one decorator name for all functions
+* **-** : unclear logic: how to handle cases with calls from different contexts
 
 Example:
 ```python
@@ -93,9 +94,9 @@ f(2, 5)
 
 Make two different decorators — one for the «normal» calls, and one for the fjorton calls.
 
-*+* : explicit logic
-*+* : no checks → fast calls
-*-* : two different decorators for the same fjorton functions
+* **+** : explicit logic
+* **+** : no checks → fast calls
+* **-** : two different decorators for the same fjorton functions
 
 `@on_stack` → for functions, implicitly called by fjorton
 `@fjorton` → for functions called via normal calls (like `f(a, b)`)
