@@ -1,4 +1,5 @@
 import byteplay
+import inspect
 
 
 def ___cstack():
@@ -21,6 +22,21 @@ def show_stack(stack):
 
 def apply(stack):
     stack.append(stack.pop()(stack.pop()))
+
+
+def map_stack(f):
+    args = inspect.getargspec(f).args
+    def wrapped(s):
+        l = len(args)
+        if len(s) < l:
+            raise TypeError("%s() takes %i arguments (%i in the stack)" %
+                            (f.func_name, l, len(s)))
+        new_args = []
+        while l:
+            new_args.append(s.pop())
+            l -= 1
+        s.extend(f(*new_args))
+    return wrapped
 
 
 def fjorton(f):

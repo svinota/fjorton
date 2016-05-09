@@ -2,27 +2,70 @@
 
 ## Description
 
+Normally, if one pushes a function name to the stack, the
+function is being called with the reference to the stack.
+The value returned from the function is not pushed to the
+stack, it has to do it explicitly:
 ```python
-
-# @... ?
-def add(a, b):
-    '''
-    a ← stack[-1]
-    b ← stack[-2]
-    '''
-    a + b
+@fjorton
+def add(stack):
+    stack.append(stack.pop() + stack.pop())
 
 
 @fjorton
 def f():
     2,
-    5,
+    3,
     add
+
+print(f())
 ```
 
-The idea is to map the last stack cells to the function arguments.
+The goal of the spec is to provide a way to map the last stack
+cells to the function arguments.
 
-## Variants
+## Solution
+
+The solution was to introduce a separate decorator, that would
+perform the mapping:
+```python
+@map_stack      # → map the stack
+def plain_add(a, b):
+    '''
+    A function with normal Python syntax.
+    To be used in `@map_stack`, has to return
+    a list, that would be merged into the stack.
+    '''
+    return [a + b]
+
+
+@map_stack      # → map the stack
+@fjorton        # → enable fjorton syntax
+def add(a, b):
+    '''
+    stack[-1] → a
+    stack[-2] → b
+    '''
+    a + b       # push the sum to the stack
+
+
+@fjorton
+def f():
+    2,
+    3,
+    add         # produces add(stack), [2, 3] → [5]
+    4,
+    plain_add   # produces plain_add(stack), [5, 4] → [9]
+
+print(f())      # None → [9]
+```
+
+The new decorator may be used with normal function to map the
+stack to args as well as with fjorton-enabled function. The order
+of decorators does matter: `@fjorton` must be the closest to the
+function.
+
+## Alternatives
 
 ### 1. The injected call.
 
