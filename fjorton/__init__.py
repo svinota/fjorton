@@ -3,11 +3,12 @@ import inspect
 
 
 def ___cstack():
-    try:
-        ___stack___ = stack
-    except NameError:
+    if 'stack' in locals():
+        ___stack___ = list(locals()['stack'])
+    else:
         ___stack___ = []
     return ___stack___
+
 
 ___stack_code = list(filter(lambda x: x[0] != byteplay.SetLineno,
                             (byteplay
@@ -16,30 +17,38 @@ ___stack_code = list(filter(lambda x: x[0] != byteplay.SetLineno,
                              .code)))[:-2]
 
 
-def show_stack(stack):
-    print(stack)
+def print_stack(*stack):
+    print(list(stack))
+    return []
 
 
 def apply(stack):
     stack.append(stack.pop()(stack.pop()))
 
 
-def map_stack(f):
-    args = inspect.getargspec(f).args
-    def wrapped(s):
-        l = len(args)
-        if len(s) < l:
-            raise TypeError("%s() takes %i arguments (%i in the stack)" %
-                            (f.func_name, l, len(s)))
-        new_args = []
-        while l:
-            new_args.append(s.pop())
-            l -= 1
-        s.extend(f(*new_args))
-    return wrapped
+def __call_func(f, stack):
+    argspec = inspect.getargspec(f)
+    l = len(argspec.args)
+    if l > 0:
+        if argspec.args[0] == 'stack':
+            f(stack)
+            return []
+        else:
+            argv = stack[-l:]
+            for _ in range(l):
+                stack.pop()
+            ret = f(*argv)
+            if not isinstance(ret, list):
+                return [ret]
+            else:
+                return ret
+    elif argspec.varargs == 'stack':
+        return f(*stack)
+    else:
+        return [f()]
 
 
-def fjorton(f):
+def func(f):
 
     def to_stack(ret):
         ret.pop()
@@ -54,14 +63,31 @@ def fjorton(f):
 
     def to_call(ret):
             ret.pop()
-            ret.extend([(byteplay.LOAD_GLOBAL, 'locals'),
+            # ret.extend([(byteplay.LOAD_GLOBAL, 'print'),
+            #             (byteplay.LOAD_GLOBAL, 'globals'),
+            #             (byteplay.CALL_FUNCTION, 0),
+            #             (byteplay.CALL_FUNCTION, 1),
+            #             (byteplay.POP_TOP, None)])
+
+            ret.extend([(byteplay.LOAD_GLOBAL, 'fjorton'),
+                        (byteplay.LOAD_ATTR, '__call_func'),
+                        (byteplay.ROT_TWO, None),
+                        (byteplay.LOAD_GLOBAL, 'locals'),
                         (byteplay.CALL_FUNCTION, 0),
                         (byteplay.LOAD_CONST, '___stack___'),
                         (byteplay.BINARY_SUBSCR, None),
+                        (byteplay.CALL_FUNCTION, 2),
+                        (byteplay.LOAD_GLOBAL, 'locals'),
+                        (byteplay.CALL_FUNCTION, 0),
+                        (byteplay.LOAD_CONST, '___stack___'),
+                        (byteplay.BINARY_SUBSCR, None),
+                        (byteplay.LOAD_ATTR, 'extend'),
+                        (byteplay.ROT_TWO, None),
                         (byteplay.CALL_FUNCTION, 1),
                         (byteplay.POP_TOP, None)])
 
     global ___stack_code
+
     c = byteplay.Code.from_code(f.func_code)
     simple = (byteplay.LOAD_FAST,
               byteplay.LOAD_CONST,
@@ -102,7 +128,8 @@ def fjorton(f):
         elif code == byteplay.POP_TOP and \
                 ret[-2][0] == byteplay.LOAD_GLOBAL:
             # is it a variable or a function?
-            if hasattr(f.func_globals[ret[-2][1]], '__call__'):
+            if ret[-2][1] in f.func_globals and \
+                    hasattr(f.func_globals[ret[-2][1]], '__call__'):
                 to_call(ret)
             else:
                 to_stack(ret)

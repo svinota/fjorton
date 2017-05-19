@@ -1,19 +1,19 @@
-from fjorton import fjorton
+import fjorton
 
 a = 2
 b = 4
 
 
-def add(stack):
-    while len(stack) > 1:
-        stack[0] += stack.pop()
+@fjorton.func
+def add(a, b):
+    a + b
 
 
 class TestSupportedTypes(object):
 
     def test_list(self):
 
-        @fjorton
+        @fjorton.func
         def f():
             [2, 3, 4]
             [5, 6, 7]
@@ -23,7 +23,7 @@ class TestSupportedTypes(object):
 
     def test_numbers(self):
 
-        @fjorton
+        @fjorton.func
         def f():
             2,
             6,
@@ -35,10 +35,10 @@ class TestSupportedTypes(object):
         a = 2
         b = 3
 
-        def c(s):
-            s[-1] += 7
+        def c(stack):
+            stack[-1] += 7
 
-        @fjorton
+        @fjorton.func
         def f():
             a
             b
@@ -49,7 +49,7 @@ class TestSupportedTypes(object):
 
     def test_globals(self):
 
-        @fjorton
+        @fjorton.func
         def f():
             a
             b
@@ -59,7 +59,7 @@ class TestSupportedTypes(object):
 
     def test_const_str(self):
 
-        @fjorton
+        @fjorton.func
         def f():
             "bala",
             "dala",
@@ -72,7 +72,7 @@ class TestSupportedTypes(object):
         RTM_NEWLINK = 16
         RTM_DELLINK = 17
 
-        @fjorton
+        @fjorton.func
         def get_interfaces(stack):
             ops = stack.pop()
             events = stack.pop()
@@ -88,7 +88,7 @@ class TestSupportedTypes(object):
                     ops[event[0]](ret, ifname)
             stack.append(ret)
 
-        @fjorton
+        @fjorton.func
         def f():
             [[RTM_NEWLINK, {'attrs': [['IFLA_IFNAME', 'eth0'],
                                       ['IFLA_ADDRESS', 'c2:b3:74:94:c2:8d']]}],
@@ -112,7 +112,7 @@ class TestSupportedTypes(object):
         class TB(object):
             attr = 67
 
-        @fjorton
+        @fjorton.func
         def f():
             TA().attr
             TB().attr
