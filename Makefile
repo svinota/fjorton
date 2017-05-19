@@ -74,7 +74,7 @@ force-version: clean-version update-version
 update-version: setup.ini
 
 test:
-	@nosetests -v \
+	@python2 `which nosetests` -v \
 		--with-coverage \
 		--cover-package=fjorton \
 		--cover-html
